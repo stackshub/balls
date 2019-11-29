@@ -15,13 +15,21 @@ Stage.prototype.onReady = function() {
   this.ballCount = parseInt(params.ballCount) || 30;
   this.shotCount = parseInt(params.shotCount) || 10;
   this.duration = parseInt(params.duration) || 30000;
-  this.maxScore = Field.calculateScore(this.ballCount, 0, 0);
+  this.maxScoreKey = [
+    'stackshub_balls_score',
+    this.ballCount,
+    this.shotCount,
+    this.duration
+  ].join('_');
+  this.maxScore =
+    parseInt(this.container.getItem(this.maxScoreKey)) ||
+    Field.calculateScore(this.ballCount, 0, 0);
   this.field = new Field(30, 50, 300, 300);
   this.shotOutput = new Shape(30, 10, 100, 30, { textFill: 'white' });
   this.scoreOutput = new Shape(130, 10, 100, 30, { textFill: 'white' });
   this.durationOutput = new Shape(230, 10, 100, 30, { textFill: 'white' });
   this.titleLabel = new Shape(0, 80, 360, 60, {
-    text: 'Balls in Slow',
+    text: this.container.getTitle(),
     textFill: { fillStyle: 'white', font: '32px sans-serif' }
   });
   this.startButton = new RoundRect(90, 170, 180, 60, {
@@ -86,6 +94,7 @@ Stage.prototype.goResult = function() {
   if (this.field.score > this.maxScore) {
     this.resultButton.text = 'New Record';
     this.maxScore = this.field.score;
+    this.container.setItem(this.maxScoreKey, this.maxScore);
   } else if (!this.field.balls.length) {
     this.resultButton.text = 'Completed';
   } else if (!this.field.restDuration) {
@@ -97,17 +106,17 @@ Stage.prototype.goResult = function() {
 };
 
 Stage.prototype.update = function() {
-  var ret = false;
-  if (this.scene === Scenes.Play) {
-    ret = this.field.tick(this.container.now());
-    this.shotOutput.text = '' + this.field.restShotCount;
-    this.scoreOutput.text = '' + this.field.score;
-    this.durationOutput.text = '' + Math.ceil(this.field.restDuration / 1000);
-    if (!ret) {
-      this.goResult();
-    }
+  if (this.scene !== Scenes.Play) {
+    return false;
   }
-  return ret;
+  var running = this.field.tick(this.container.now());
+  this.shotOutput.text = '' + this.field.restShotCount;
+  this.scoreOutput.text = '' + this.field.score;
+  this.durationOutput.text = '' + Math.ceil(this.field.restDuration / 1000);
+  if (!running) {
+    this.goResult();
+  }
+  return running;
 };
 
 Stage.prototype.render = function(context) {

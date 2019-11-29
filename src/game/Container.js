@@ -7,6 +7,7 @@ function Container(window, stage) {
   this.canvas = window.document.createElement('canvas');
   this.context = this.canvas.getContext('2d');
   this.lastFrameTime = 0;
+  this.storageCache = {};
 
   var self = this;
   listen(window, 'DOMContentLoaded', function(event) {
@@ -236,4 +237,32 @@ Container.prototype.replaceHash = function(hash) {
       ? '#' + hash
       : this.window.location.pathname + this.window.location.search
   );
+};
+
+Container.prototype.getTitle = function() {
+  return this.window.document.title;
+};
+
+Container.prototype.getItem = function(key) {
+  var value = this.storageCache[key];
+  if (value === undefined) {
+    try {
+      value = this.window.localStorage.getItem(key);
+    } catch (e) {
+      value = null;
+    }
+  }
+  return value;
+};
+
+Container.prototype.setItem = function(key, value) {
+  if (typeof value !== 'string') {
+    value = '' + value;
+  }
+  this.storageCache[key] = value;
+  try {
+    this.window.localStorage.setItem(key, value);
+  } catch (e) {
+    /* pass */
+  }
 };
