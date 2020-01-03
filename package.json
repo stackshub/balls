@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "build": "webpack",
     "watch": "webpack --watch",
-    "open": "open -a \"Google Chrome\" docs/index.html"
+    "open": "open -a \"Google Chrome\" docs/index.html --args \"--auto-open-devtools-for-tabs\""
   },
   "devDependencies": {
     "eslint": "^6.7.1",
