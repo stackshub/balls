@@ -13,24 +13,33 @@ function Stage() {
 Stage.prototype.onReady = function() {
   var params = this.container.getSearchParams();
   this.ballCount = parseInt(params.ballCount) || 30;
-  this.shotCount = parseInt(params.shotCount) || 10;
+  this.bulletCount = parseInt(params.bulletCount) || 10;
   this.duration = parseInt(params.duration) || 30000;
   this.maxScoreKey = [
     'stackshub_balls_score',
     this.ballCount,
-    this.shotCount,
+    this.bulletCount,
     this.duration
   ].join('_');
   this.maxScore =
     parseInt(this.container.getItem(this.maxScoreKey)) ||
     Field.calculateScore(this.ballCount, 0, 0);
   this.field = new Field(30, 50, 300, 300);
-  this.shotOutput = new Shape(30, 10, 100, 30, { textFill: 'white' });
-  this.scoreOutput = new Shape(130, 10, 100, 30, { textFill: 'white' });
-  this.durationOutput = new Shape(230, 10, 100, 30, { textFill: 'white' });
+  this.bulletLabel = new Shape(30, 5, 100, 20, {
+    text: 'Bullets',
+    textFill: 'white'
+  });
+  this.bulletOutput = new Shape(30, 25, 100, 20, { textFill: 'white' });
+  this.scoreLabel = new Shape(130, 5, 100, 20, { textFill: 'white' });
+  this.scoreOutput = new Shape(130, 25, 100, 20, { textFill: 'white' });
+  this.durationLabel = new Shape(230, 5, 100, 20, {
+    text: 'Time',
+    textFill: 'white'
+  });
+  this.durationOutput = new Shape(230, 25, 100, 20, { textFill: 'white' });
   this.titleLabel = new Shape(0, 80, 360, 60, {
     text: this.container.getTitle(),
-    textFill: { fillStyle: 'white', font: '32px sans-serif' }
+    textFill: { fillStyle: 'white', font: '32px Arial' }
   });
   this.startButton = new RoundRect(90, 170, 180, 60, {
     stroke: 'white',
@@ -39,7 +48,7 @@ Stage.prototype.onReady = function() {
   });
   this.readmeButton = new RoundRect(90, 260, 180, 60, {
     stroke: 'white',
-    text: 'Readme',
+    text: 'Readme @ GitHub',
     textFill: 'white'
   });
   this.resultButton = new RoundRect(90, 170, 180, 60, {
@@ -78,14 +87,16 @@ Stage.prototype.onPointerDown = function(x, y) {
 };
 
 Stage.prototype.goHome = function() {
-  this.field.init(this.ballCount, this.shotCount, this.duration);
-  this.shotOutput.text = this.shotCount;
+  this.field.init(this.ballCount, this.bulletCount, this.duration);
+  this.bulletOutput.text = this.bulletCount;
+  this.scoreLabel.text = 'Best Score';
   this.scoreOutput.text = this.maxScore;
   this.durationOutput.text = Math.ceil(this.duration / 1000);
   this.scene = Scenes.Home;
 };
 
 Stage.prototype.goPlay = function() {
+  this.scoreLabel.text = 'Score';
   this.field.start(this.container.now());
   this.scene = Scenes.Play;
 };
@@ -100,7 +111,7 @@ Stage.prototype.goResult = function() {
   } else if (!this.field.restDuration) {
     this.resultButton.text = 'Time\'s Up';
   } else {
-    this.resultButton.text = 'Finished';
+    this.resultButton.text = 'Out of Bullets';
   }
   this.scene = Scenes.Result;
 };
@@ -110,7 +121,7 @@ Stage.prototype.update = function() {
     return false;
   }
   var running = this.field.tick(this.container.now());
-  this.shotOutput.text = '' + this.field.restShotCount;
+  this.bulletOutput.text = '' + this.field.restBulletCount;
   this.scoreOutput.text = '' + this.field.score;
   this.durationOutput.text = '' + Math.ceil(this.field.restDuration / 1000);
   if (!running) {
@@ -134,8 +145,11 @@ Stage.prototype.render = function(context) {
     this.resultButton.render(context);
     break;
   }
-  this.shotOutput.render(context);
+  this.bulletLabel.render(context);
+  this.bulletOutput.render(context);
+  this.scoreLabel.render(context);
   this.scoreOutput.render(context);
+  this.durationLabel.render(context);
   this.durationOutput.render(context);
 };
 

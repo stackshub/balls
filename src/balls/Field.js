@@ -9,9 +9,9 @@ function Field(x, y, w, h) {
 
 Field.prototype = Object.create(Shape.prototype);
 
-Field.prototype.init = function(ballCount, shotCount, duration) {
+Field.prototype.init = function(ballCount, bulletCount, duration) {
   this.ballCount = ballCount;
-  this.restShotCount = shotCount;
+  this.restBulletCount = bulletCount;
   this.restDuration = duration;
   this.score = 0;
   this.gravity = 0.0005;
@@ -41,7 +41,7 @@ Field.prototype.init = function(ballCount, shotCount, duration) {
 };
 
 Field.prototype.onPointerDown = function(x, y) {
-  if (this.restShotCount <= 0) {
+  if (this.restBulletCount <= 0) {
     return;
   }
   if (this.state === States.Running) {
@@ -82,17 +82,17 @@ Field.prototype.shoot = function(x, y) {
   this.mark.text = '' + this.removeBalls.length;
   this.mark.cx = x;
   this.mark.cy = y;
-  this.restShotCount--;
+  this.restBulletCount--;
   if (!this.balls.length) {
     this.score += Field.calculateScore(
       0,
-      this.restShotCount,
+      this.restBulletCount,
       this.restDuration
     );
     this.state = States.Finished;
     return;
   }
-  if (!this.restShotCount) {
+  if (!this.restBulletCount) {
     this.state = States.Finished;
     return;
   }
@@ -163,8 +163,8 @@ Field.prototype.render = function(context) {
   }
 };
 
-Field.calculateScore = function(ballCount, shotCount, duration) {
-  return ballCount * 1000 + shotCount * 100 + Math.ceil(duration / 1000);
+Field.calculateScore = function(ballCount, bulletCount, duration) {
+  return ballCount * 1000 + bulletCount * 100 + Math.ceil(duration / 1000);
 };
 
 var States = {
